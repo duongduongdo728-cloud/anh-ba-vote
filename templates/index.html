@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vote: Anh Ba sẽ chọn con đường nào?</title>
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --card: #fffaf1;
+      --text: #243127;
+      --muted: #6d756d;
+      --primary: #0f7a5f;
+      --primary-dark: #095846;
+      --border: #e3d8c8;
+      --accent: #c8963e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(200, 150, 62, 0.22), transparent 34%),
+        linear-gradient(135deg, #f8f1e5 0%, #efe3d0 100%);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 32px 16px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1080px;
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .hero {
+      padding: 20px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--primary-dark);
+      background: rgba(255, 250, 241, 0.75);
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(34px, 5vw, 58px);
+      line-height: 1.05;
+      letter-spacing: -1.7px;
+      margin-bottom: 18px;
+    }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.7;
+      max-width: 460px;
+    }
+
+    .card {
+      background: rgba(255, 250, 241, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      box-shadow: 0 24px 70px rgba(82, 61, 32, 0.16);
+      padding: 28px;
+      backdrop-filter: blur(14px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 22px;
+    }
+
+    .card-header h2 {
+      font-size: 24px;
+      letter-spacing: -0.5px;
+    }
+
+    .vote-count {
+      padding: 8px 12px;
+      border-radius: 14px;
+      background: #efe5d4;
+      color: var(--primary-dark);
+      font-weight: 800;
+      white-space: nowrap;
+      font-size: 14px;
+    }
+
+    .options {
+      display: grid;
+      gap: 16px;
+    }
+
+    .option {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: #fffdf7;
+      padding: 20px;
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .option:hover {
+      transform: translateY(-2px);
+      border-color: rgba(15, 122, 95, 0.45);
+      box-shadow: 0 14px 28px rgba(82, 61, 32, 0.09);
+    }
+
+    .option.selected {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(15, 122, 95, 0.12);
+    }
+
+    .option.disabled {
+      cursor: default;
+      opacity: 0.78;
+    }
+
+    .option-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .option-title {
+      font-size: 18px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    .percent {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--primary-dark);
+    }
+
+    .option-desc {
+      position: relative;
+      z-index: 1;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+
+    .bar-wrap {
+      position: relative;
+      z-index: 1;
+      height: 10px;
+      border-radius: 999px;
+      background: #efe6d8;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width 0.55s ease;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 16px;
+      padding: 12px 16px;
+      font-weight: 850;
+      cursor: pointer;
+      transition: transform 0.16s ease, opacity 0.16s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: default;
+      opacity: 0.65;
+      transform: none;
+    }
+
+    .primary-btn {
+      background: var(--primary);
+      color: white;
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .secondary-btn {
+      background: #efe5d4;
+      color: var(--text);
+    }
+
+    .image-zone {
+      margin-top: 24px;
+      border-radius: 24px;
+      overflow: hidden;
+      background: #fffdf7;
+      border: 1px solid var(--border);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+    }
+
+    .image-zone img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .image-caption {
+      padding: 10px 14px 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 16px;
+    }
+
+    .toast {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(15, 122, 95, 0.1);
+      color: var(--primary-dark);
+      font-weight: 750;
+    }
+
+    .toast.show {
+      display: block;
+    }
+
+    @media (max-width: 820px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 0;
+      }
+
+      .card {
+        padding: 22px;
+        border-radius: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="badge">🗳️ Public Vote</div>
+      <h1>Anh Ba sẽ chọn con đường nào?</h1>
+      <p>
+        Website vote bằng Python Flask. Mọi người truy cập cùng một link sẽ thấy cùng kết quả vote được lưu trên server.
+      </p>
+    </section>
+
+    <section class="card" aria-label="Bảng bình chọn">
+      <div class="card-header">
+        <h2>Bạn chọn phương án nào?</h2>
+        <div class="vote-count" id="totalVotes">0 vote</div>
+      </div>
+
+      <div class="options">
+        <article class="option" data-option="option1" tabindex="0" role="button" aria-label="Chọn Anh Ba ra đi tìm đường cứu nước">
+          <div class="option-top">
+            <div class="option-title">1. Anh Ba ra đi tìm đường cứu nước</div>
+            <div class="percent" id="percent1">0%</div>
+          </div>
+          <p class="option-desc">Lựa chọn hành trình ra đi, khám phá và tìm kiếm con đường mới.</p>
+          <div class="bar-wrap"><div class="bar" id="bar1"></div></div>
+        </article>
+
+        <article class="option" data-option="option2" tabindex="0" role="button" aria-label="Chọn Anh Ba ở lại">
+          <div class="option-top">
+            <div class="option-title">2. Anh Ba ở lại</div>
+            <div class="percent" id="percent2">0%</div>
+          </div>
+          <p class="option-desc">Lựa chọn ở lại, quan sát tình hình và tìm hướng đi từ trong nước.</p>
+          <div class="bar-wrap"><div class="bar" id="bar2"></div></div>
+        </article>
+      </div>
+
+      <div class="actions">
+        <button class="primary-btn" id="voteBtn">Vote ngay</button>
+        <button class="secondary-btn" id="refreshBtn">Cập nhật kết quả</button>
+      </div>
+
+      <div class="toast" id="toast">Cảm ơn bạn đã vote!</div>
+
+      <div class="image-zone" aria-label="Ảnh Anh Ba bên tàu Latouche-Tréville">
+        <img src="/static/anh_ba_vote_image.jpg" alt="Anh Ba bên tàu Latouche-Tréville" />
+        <div class="image-caption">Ảnh minh họa Anh Ba ra đi tìm đường cứu nước.</div>
+      </div>
+
+      <p class="note">
+        Bản Python này lưu vote bằng SQLite trên server. Mỗi trình duyệt chỉ được vote một lần bằng session cookie.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    let selectedOption = null;
+    let votedOption = null;
+    let votes = {
+      option1: 0,
+      option2: 0
+    };
+
+    const optionCards = document.querySelectorAll(".option");
+    const voteBtn = document.getElementById("voteBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const toast = document.getElementById("toast");
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+    }
+
+    function getTotal() {
+      return votes.option1 + votes.option2;
+    }
+
+    function calculatePercent(value, total) {
+      if (total === 0) return 0;
+      return Math.round((value / total) * 100);
+    }
+
+    function render() {
+      const total = getTotal();
+      const percent1 = calculatePercent(votes.option1, total);
+      const percent2 = calculatePercent(votes.option2, total);
+
+      document.getElementById("totalVotes").textContent = `${total} vote${total > 1 ? "s" : ""}`;
+      document.getElementById("percent1").textContent = `${percent1}%`;
+      document.getElementById("percent2").textContent = `${percent2}%`;
+      document.getElementById("bar1").style.width = `${percent1}%`;
+      document.getElementById("bar2").style.width = `${percent2}%`;
+
+      optionCards.forEach((card) => {
+        const option = card.dataset.option;
+        card.classList.toggle("selected", option === selectedOption || option === votedOption);
+        card.classList.toggle("disabled", Boolean(votedOption));
+      });
+
+      if (votedOption) {
+        voteBtn.textContent = "Đã vote";
+        voteBtn.disabled = true;
+      } else {
+        voteBtn.textContent = "Vote ngay";
+        voteBtn.disabled = false;
+      }
+    }
+
+    async function fetchResults() {
+      const response = await fetch("/api/results");
+      const result = await response.json();
+
+      votes = result.counts;
+      votedOption = result.voted_option;
+
+      if (votedOption) {
+        selectedOption = votedOption;
+      }
+
+      render();
+    }
+
+    function selectOption(option) {
+      if (votedOption) {
+        showToast("Bạn đã vote trên trình duyệt này rồi.");
+        return;
+      }
+
+      selectedOption = option;
+      render();
+    }
+
+    optionCards.forEach((card) => {
+      card.addEventListener("click", () => selectOption(card.dataset.option));
+      card.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectOption(card.dataset.option);
+        }
+      });
+    });
+
+    voteBtn.addEventListener("click", async () => {
+      if (!selectedOption) {
+        showToast("Vui lòng chọn một phương án trước khi vote.");
+        return;
+      }
+
+      const response = await fetch("/api/vote", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ option: selectedOption })
+      });
+
+      const result = await response.json();
+
+      showToast(result.message);
+
+      await fetchResults();
+    });
+
+    refreshBtn.addEventListener("click", async () => {
+      await fetchResults();
+      showToast("Đã cập nhật kết quả mới nhất.");
+    });
+
+    fetchResults();
+    setInterval(fetchResults, 5000);
+  </script>
+</body>
+</html>
